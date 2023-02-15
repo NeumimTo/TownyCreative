@@ -1,7 +1,10 @@
 package cz.neumimto.townycreative;
 
-
+import com.palmergames.bukkit.towny.event.nation.NationTownLeaveEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerExitsFromTownBorderEvent;
+import com.palmergames.bukkit.towny.event.town.TownLeaveEvent;
+import com.palmergames.bukkit.towny.object.Resident;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -12,6 +15,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
+
+import java.util.Collection;
+import java.util.List;
 
 public class BlockListener implements Listener {
 
@@ -108,6 +114,38 @@ public class BlockListener implements Listener {
         gamemodeService.disableForPlayer(player);
     }
 
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (player.hasPermission("townycreative.player.toggle")
+                && !player.hasPermission("townycreative.player.bypasslogin")) {
+            if (player.getGameMode() == GameMode.CREATIVE) {
+                gamemodeService.disableForPlayer(player);
+            }
+        }
+    }
+
+    @EventHandler
+    public void townDisbandEvent(TownLeaveEvent event) {
+        List<Resident> residents = event.getTown().getResidents();
+        removeForResidents(residents);
+    }
+
+    @EventHandler
+    public void nationDisbandedEvent(NationTownLeaveEvent event) {
+        List<Resident> residents = event.getTown().getResidents();
+        removeForResidents(residents);
+    }
+
+    public void removeForResidents(Collection<Resident> res) {
+        for (Resident resident : res) {
+            Player player = Bukkit.getPlayer(resident.getUUID());
+            if (player == null || ignore(player)) {
+                continue;
+            }
+            gamemodeService.disableForPlayer(player);
+        }
+    }
 
     public boolean ignore(Player player) {
 
