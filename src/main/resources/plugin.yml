@@ -1,0 +1,6 @@
+name: TownyCreative
+version: '${version}'
+main: cz.neumimto.townycreative.TownyCreative
+api-version: 1.19
+depend: [Towny]
+authors: [NeumimTo]
